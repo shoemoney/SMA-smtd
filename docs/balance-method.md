@@ -10,6 +10,8 @@ The output includes each attempted command, result, integer simulation tick, cas
 
 The JSON carries SHA-256 hashes of runtime source, content, the runner, and the frozen policy specification. A replay rejects a different source or policy hash. No timestamps are included in deterministic results. Command logs are embedded in `runs[].commands`; keep reports private until reviewed for the intended audience.
 
+`compareReports` validates schema, split, strike mode, exact declared seeds, policy specification and hash, source inventory and hashes, and unique seed/policy run membership. Only `src/content.ts` may differ between paired source inventories. Run provenance must match its panel. Comparison recomputes summaries from runs and ignores supplied summary values before evaluating gates; mixing tuning, held-out, or strike panels fails. Validate saved private panels without rerunning combat by setting `SMTD_BALANCE_REVIEW_DIR` and running `npm test -- tests/comparison.test.ts`.
+
 ## Frozen policies and samples
 
 Both mixed rosters deploy four opening Cadets, then fill the same fixed sixteen-pad order. Diverse follows the existing campaign regression roster. Splash/control uses four Grenadiers and two Engineers, versus two of each in Diverse, and fewer Gunners. This alternative emphasizes splash and slowing without optimizing against individual seed outcomes. Concentrated policies place only Gunners or only Snipers in that same pad order. Frozen follows Diverse through preparation for wave ten, then stops purchasing. All retain default first-target policy.
