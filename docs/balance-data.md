@@ -1,6 +1,6 @@
 # Starting balance data
 
-These are authored starting hypotheses, not validated balance. Rates are shots per simulation second; upgrade prices are incremental. Start with 100 cash, 20 lives, and three airstrikes for the whole campaign.
+These remain authored values, not validated overall balance. A preregistered promotion timing pass doubled second-promotion prices and quadrupled third-promotion prices while preserving deployment, first promotion, and all combat values. See [the repeatable method and sample results](balance-method.md). Rates are shots per simulation second; upgrade prices are incremental. Start with 100 cash, 20 lives, and three airstrikes for the whole campaign.
 
 ## All 24 soldier ranks
 
@@ -8,28 +8,28 @@ These are authored starting hypotheses, not validated balance. Rates are shots p
 | --- | --- | --- | ---: | ---: | ---: | ---: | --- |
 | Cadet | 0 | Cadet | 10 | 9 | 2 | 3.4 | None |
 | Cadet | 1 | Private | 10 | 17 | 2 | 3.7 | None |
-| Cadet | 2 | Corporal | 20 | 31 | 2 | 4 | None |
-| Cadet | 3 | Sergeant | 35 | 55 | 2 | 4.4 | None |
+| Cadet | 2 | Corporal | 40 | 31 | 2 | 4 | None |
+| Cadet | 3 | Sergeant | 140 | 55 | 2 | 4.4 | None |
 | Machine Gunner | 0 | Machine Gunner | 25 | 12 | 3 | 3.8 | Berserker Rage: 5% inactive shot, 5× rate for 5 seconds |
 | Machine Gunner | 1 | Fireteam Gunner | 20 | 22 | 3.2 | 4 | Berserker Rage: 5% inactive shot, 5× rate for 5 seconds |
-| Machine Gunner | 2 | Squad Gunner | 35 | 38 | 3.5 | 4.3 | Berserker Rage: 5% inactive shot, 5× rate for 5 seconds |
-| Machine Gunner | 3 | Master Gunner | 55 | 64 | 4 | 4.6 | Berserker Rage: 5% inactive shot, 5× rate for 5 seconds |
+| Machine Gunner | 2 | Squad Gunner | 70 | 38 | 3.5 | 4.3 | Berserker Rage: 5% inactive shot, 5× rate for 5 seconds |
+| Machine Gunner | 3 | Master Gunner | 220 | 64 | 4 | 4.6 | Berserker Rage: 5% inactive shot, 5× rate for 5 seconds |
 | Sniper | 0 | Sniper | 40 | 95 | 0.5 | 6 | Headshot: 10% per shot; normal kill / boss 5× |
 | Sniper | 1 | Marksman | 25 | 165 | 0.55 | 6.4 | Headshot: 10% per shot; normal kill / boss 5× |
-| Sniper | 2 | Sharpshooter | 45 | 285 | 0.6 | 6.8 | Headshot: 10% per shot; normal kill / boss 5× |
-| Sniper | 3 | Scout Sniper | 70 | 490 | 0.65 | 7.2 | Headshot: 10% per shot; normal kill / boss 5× |
+| Sniper | 2 | Sharpshooter | 90 | 285 | 0.6 | 6.8 | Headshot: 10% per shot; normal kill / boss 5× |
+| Sniper | 3 | Scout Sniper | 280 | 490 | 0.65 | 7.2 | Headshot: 10% per shot; normal kill / boss 5× |
 | Grenadier | 0 | Grenadier | 55 | 35 | 0.8 | 4.3 | Splash 1.5 |
 | Grenadier | 1 | Assault Grenadier | 25 | 65 | 0.85 | 4.5 | Splash 1.7 |
-| Grenadier | 2 | Demolition Specialist | 45 | 115 | 0.9 | 4.8 | Splash 2 |
-| Grenadier | 3 | Ordnance Chief | 65 | 195 | 1 | 5.1 | Splash 2.3 |
+| Grenadier | 2 | Demolition Specialist | 90 | 115 | 0.9 | 4.8 | Splash 2 |
+| Grenadier | 3 | Ordnance Chief | 260 | 195 | 1 | 5.1 | Splash 2.3 |
 | Combat Engineer | 0 | Combat Engineer | 70 | 8 | 1.2 | 3.8 | Slow 35% |
 | Combat Engineer | 1 | Sapper | 20 | 15 | 1.3 | 4 | Slow 40% |
-| Combat Engineer | 2 | Field Engineer | 35 | 27 | 1.4 | 4.3 | Slow 45% |
-| Combat Engineer | 3 | Chief Engineer | 55 | 46 | 1.5 | 4.6 | Slow 50% |
+| Combat Engineer | 2 | Field Engineer | 70 | 27 | 1.4 | 4.3 | Slow 45% |
+| Combat Engineer | 3 | Chief Engineer | 220 | 46 | 1.5 | 4.6 | Slow 50% |
 | Field Officer | 0 | Field Officer | 85 | 12 | 1.4 | 4 | Aura 15% |
 | Field Officer | 1 | Lieutenant | 25 | 22 | 1.5 | 4.3 | Aura 20% |
-| Field Officer | 2 | Captain | 45 | 39 | 1.6 | 4.6 | Aura 25% |
-| Field Officer | 3 | Major | 70 | 66 | 1.7 | 5 | Aura 30% |
+| Field Officer | 2 | Captain | 90 | 39 | 1.6 | 4.6 | Aura 25% |
+| Field Officer | 3 | Major | 280 | 66 | 1.7 | 5 | Aura 30% |
 
 ## Enemy profiles
 

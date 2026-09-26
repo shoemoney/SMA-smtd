@@ -51,12 +51,12 @@ Each role has one fixed ladder: base rank plus three sequential upgrades. Prices
 
 | Role | Base and three upgrades | Incremental dollars | Full investment |
 | --- | --- | --- | ---: |
-| Cadet | Cadet; Private; Corporal; Sergeant | 10; 10; 20; 35 | 75 |
-| Machine Gunner | Machine Gunner; Fireteam Gunner; Squad Gunner; Master Gunner | 25; 20; 35; 55 | 135 |
-| Sniper | Sniper; Marksman; Sharpshooter; Scout Sniper | 40; 25; 45; 70 | 180 |
-| Grenadier | Grenadier; Assault Grenadier; Demolition Specialist; Ordnance Chief | 55; 25; 45; 65 | 190 |
-| Combat Engineer | Combat Engineer; Sapper; Field Engineer; Chief Engineer | 70; 20; 35; 55 | 180 |
-| Field Officer | Field Officer; Lieutenant; Captain; Major | 85; 25; 45; 70 | 225 |
+| Cadet | Cadet; Private; Corporal; Sergeant | 10; 10; 40; 140 | 200 |
+| Machine Gunner | Machine Gunner; Fireteam Gunner; Squad Gunner; Master Gunner | 25; 20; 70; 220 | 335 |
+| Sniper | Sniper; Marksman; Sharpshooter; Scout Sniper | 40; 25; 90; 280 | 435 |
+| Grenadier | Grenadier; Assault Grenadier; Demolition Specialist; Ordnance Chief | 55; 25; 90; 260 | 430 |
+| Combat Engineer | Combat Engineer; Sapper; Field Engineer; Chief Engineer | 70; 20; 70; 220 | 380 |
+| Field Officer | Field Officer; Lieutenant; Captain; Major | 85; 25; 90; 280 | 480 |
 
 **Cadet.** The low-cost pistol establishes the opening and catches damaged stragglers. Its rate remains two shots per second across every rank, while damage progresses from 9 to 55 and range from 3.4 to 4.4. It has no proc, aura, splash, slow, or hidden special effect at any rank. Its test is economic relevance: a cheap rear guard should sometimes be a better correction than saving for another expensive specialist.
 
