@@ -578,7 +578,7 @@ export async function createBattlefield(host: HTMLElement, onDeviceLost: () => v
     const mobile = width < 650;
     camera.position.set(mobile ? 22 : 0, mobile ? 30 : 22, mobile ? 0 : 20);
     camera.lookAt(0, 0, 0);
-    const viewHeight = mobile ? Math.max(19.2, (MAP_D + 2) / viewAspect) : Math.max(18.4, MAP_W / viewAspect);
+    const viewHeight = mobile ? Math.max(15.5, (MAP_D + 3) / viewAspect) : Math.max(14, (MAP_W + 3) / viewAspect);
     camera.left = -viewHeight * viewAspect / 2;
     camera.right = viewHeight * viewAspect / 2;
     camera.top = viewHeight / 2;

@@ -61,7 +61,6 @@ get('#app').innerHTML = `
   <dialog id="result" class="small-dialog result-dialog" aria-labelledby="result-title"><p class="eyebrow">OPERATION REPORT</p><h2 id="result-title"></h2><p id="result-copy"></p><div class="result-stats" id="result-stats"></div><p id="personal-best"></p><form id="score-form"><label for="player-name">Your name on the arcade board</label><input id="player-name" name="name" maxlength="24" placeholder="Commander" required autocomplete="nickname"><button class="quiet" id="submit-score" type="submit">${fa(faMedal)} Submit score</button><p id="score-message">Scores are reported by your browser.</p></form><div class="dialog-actions"><button class="quiet" data-close="result">Review battlefield</button><button id="play-again" class="primary">${fa(faRotateRight)} Play again</button></div></dialog>
 `;
 
-get('main').insertBefore(get('.roster-section'), get('.command-layout'));
 
 const padButtons = PADS.map(pad => {
   const button = document.createElement('button');
