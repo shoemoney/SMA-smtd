@@ -3,6 +3,7 @@ import {
   BoxGeometry,
   BufferGeometry,
   CapsuleGeometry,
+  ConeGeometry,
   CylinderGeometry,
   DirectionalLight,
   DodecahedronGeometry,
@@ -258,6 +259,17 @@ export async function createBattlefield(host: HTMLElement, onDeviceLost: () => v
   }
   scene.add(padGroup);
 
+  // Body-level lean and squat per role. Applied to the `body` group only, never `root`, so
+  // applyRank's rank-ring/rank-mark children (which live on root) stay anchored correctly.
+  const STANCE: Record<Role, { lean: number; height: number; width: number }> = {
+    cadet: { lean: 0, height: 1, width: 1 },
+    officer: { lean: -0.05, height: 1, width: 1 },
+    gunner: { lean: 0.16, height: 0.92, width: 1.06 },
+    sniper: { lean: 0.06, height: 0.86, width: 1 },
+    grenadier: { lean: 0.02, height: 1, width: 1 },
+    engineer: { lean: 0.14, height: 0.95, width: 1 },
+  };
+
   function makeSoldier(role: Role): Group {
     const root = new Group();
     const color = colorForRole[role];
@@ -279,9 +291,19 @@ export async function createBattlefield(host: HTMLElement, onDeviceLost: () => v
     part(body, boxGeo(), roleAccent, [0, 1.47, 0.22], [0.55, 0.06, 0.1]);
     for (const side of [-1, 1]) {
       const arm = part(body, capsuleGeo(), uniform, [side * 0.42, 1.13, 0.15], [0.78, 0.76, 0.76]);
-      arm.rotation.x = -0.42;
-      arm.rotation.z = side * 0.22;
-      part(body, sphereGeo(), skinMat, [side * 0.34, 0.88, 0.48], [0.13, 0.13, 0.16]);
+      if (role === 'officer' && side === 1) {
+        // Raised commanding arm: breaks the outline above the shoulder, unique to the officer
+        // and readable from any facing angle, unlike a small held prop.
+        arm.rotation.x = -1.35;
+        arm.rotation.z = side * 0.08;
+        part(body, sphereGeo(), skinMat, [side * 0.46, 1.58, 0.02], [0.13, 0.13, 0.16]);
+        const baton = part(body, cylinderGeo(), plateMat, [side * 0.48, 1.72, -0.06], [0.03, 0.24, 0.03]);
+        baton.rotation.x = -0.35;
+      } else {
+        arm.rotation.x = -0.42;
+        arm.rotation.z = side * 0.22;
+        part(body, sphereGeo(), skinMat, [side * 0.34, 0.88, 0.48], [0.13, 0.13, 0.16]);
+      }
     }
     part(body, cylinderGeo(), skinMat, [0, 1.59, 0], [0.12, 0.19, 0.12]);
     part(body, sphereGeo(), skinMat, [0, 1.77, 0.01], [0.27, 0.29, 0.25]);
@@ -294,38 +316,68 @@ export async function createBattlefield(host: HTMLElement, onDeviceLost: () => v
       part(body, boxGeo(), uniform, [0, 2.02, 0], [0.42, 0.12, 0.38]);
       part(body, boxGeo(), roleAccent, [0, 2.1, 0.02], [0.2, 0.06, 0.2]);
     }
-    // Role-specific carried gear: all weapons point along local +Z and read clearly in silhouette.
+    // Role-specific carried gear: every role now carries a genuinely different weapon block, and
+    // each contributes at least one large shape (vertical rifle, raised arm, bipod, tube, tall
+    // pack, scope tower) that reads as a silhouette at 40px, not just a surface decal.
     const weaponMat = standard(`weapon-${role}`, 0x182a35, { metalness: 0.6, roughness: 0.34 });
     const barrelMat = standard(`barrel-${role}`, 0x52636b, { metalness: 0.75, roughness: 0.24 });
-    if (role === 'cadet' || role === 'officer') {
-      part(body, boxGeo(), weaponMat, [0.23, 0.91, 0.48], [0.1, 0.12, 0.28]);
-      part(body, cylinderGeo(), barrelMat, [0.23, 0.94, 0.66], [0.035, 0.055, 0.2]).rotation.x = Math.PI / 2;
-      part(body, boxGeo(), weaponMat, [0.23, 0.81, 0.48], [0.07, 0.17, 0.08]);
+    if (role === 'cadet') {
+      // Small forward pistol; the real silhouette read is the rifle slung diagonally across the
+      // back, angled across the ground plane (yaw, not pitch) so it stays legible from the
+      // battlefield's steep top-down camera instead of foreshortening into a dot.
+      part(body, boxGeo(), weaponMat, [0.2, 0.88, 0.42], [0.09, 0.11, 0.17]);
+      part(body, boxGeo(), weaponMat, [0.2, 0.78, 0.4], [0.045, 0.13, 0.06]);
+      const sling = part(body, boxGeo(), weaponMat, [0, 1.64, -0.38], [0.14, 0.13, 1]);
+      sling.rotation.y = 0.75;
+      const slingBarrel = part(body, cylinderGeo(), barrelMat, [-0.34, 1.64, -0.73], [0.04, 0.32, 0.04]);
+      slingBarrel.rotation.x = Math.PI / 2; slingBarrel.rotation.y = 0.75;
+    } else if (role === 'officer') {
+      // Holstered sidearm at the hip; the real silhouette read is the raised commanding arm above.
+      part(body, boxGeo(), weaponMat, [-0.26, 0.83, 0.1], [0.09, 0.17, 0.09]);
+      part(body, boxGeo(), plateMat, [-0.26, 0.94, 0.1], [0.11, 0.045, 0.1]);
     } else if (role === 'gunner') {
+      // Heavy SAW plus a splayed bipod: the widest, lowest-braced silhouette on the field.
       part(body, boxGeo(), weaponMat, [0, 0.97, 0.46], [0.2, 0.16, 0.66]);
       part(body, cylinderGeo(), barrelMat, [0, 0.99, 0.88], [0.06, 0.075, 0.38]).rotation.x = Math.PI / 2;
       part(body, boxGeo(), weaponMat, [0, 0.78, 0.48], [0.14, 0.28, 0.17]);
       part(body, boxGeo(), plateMat, [0.1, 1.11, 0.42], [0.2, 0.09, 0.17]);
+      for (const side of [-1, 1]) {
+        const bipod = part(body, cylinderGeo(), barrelMat, [side * 0.32, 0.55, 0.94], [0.026, 0.5, 0.026]);
+        bipod.rotation.z = side * 0.95;
+        bipod.rotation.x = 0.1;
+      }
     } else if (role === 'sniper') {
-      part(body, boxGeo(), weaponMat, [0.04, 0.99, 0.45], [0.13, 0.12, 0.86]);
-      part(body, cylinderGeo(), barrelMat, [0.04, 1, 0.98], [0.035, 0.04, 0.42]).rotation.x = Math.PI / 2;
-      part(body, cylinderGeo(), plateMat, [0.04, 1.12, 0.42], [0.06, 0.1, 0.19]);
+      // Long rifle, front bipod and a tall scope tower rising above the weapon line.
+      part(body, boxGeo(), weaponMat, [0.04, 0.99, 0.4], [0.13, 0.12, 0.95]);
+      part(body, cylinderGeo(), barrelMat, [0.04, 1, 1.02], [0.03, 0.045, 0.55]).rotation.x = Math.PI / 2;
       part(body, boxGeo(), weaponMat, [0.04, 0.84, 0.45], [0.06, 0.2, 0.12]);
+      part(body, cylinderGeo(), plateMat, [0.04, 1.2, 0.52], [0.055, 0.34, 0.055]);
+      for (const side of [-1, 1]) {
+        const bipod = part(body, cylinderGeo(), barrelMat, [side * 0.28, 0.45, 0.78], [0.024, 0.52, 0.024]);
+        bipod.rotation.z = side * 0.9;
+      }
     } else if (role === 'grenadier') {
-      part(body, boxGeo(), weaponMat, [0, 0.99, 0.47], [0.18, 0.14, 0.58]);
-      part(body, cylinderGeo(), barrelMat, [0, 1, 0.87], [0.055, 0.06, 0.28]).rotation.x = Math.PI / 2;
-      for (const side of [-1, 1]) part(body, cylinderGeo(), standard('grenade', 0x6b7954), [side * 0.34, 0.9, -0.1], [0.095, 0.2, 0.095]);
+      // Short grip plus a big shoulder-mounted launcher tube — a bold cylindrical mass over the shoulder.
+      part(body, boxGeo(), weaponMat, [0.14, 0.94, 0.42], [0.14, 0.13, 0.3]);
+      const tube = part(body, cylinderGeo(), barrelMat, [-0.32, 1.58, -0.14], [0.17, 0.74, 0.17]);
+      tube.rotation.z = 0.32; tube.rotation.x = -0.26;
+      const flare = part(body, cylinderGeo(), plateMat, [-0.5, 1.97, -0.37], [0.2, 0.11, 0.2]);
+      flare.rotation.z = 0.32; flare.rotation.x = -0.26;
     } else {
-      // Engineer: carbine plus unmistakable field pack and tool roll.
+      // Engineer: carbine plus an oversized field pack that rises above the head line under a forward hunch.
       part(body, boxGeo(), weaponMat, [0.12, 0.99, 0.46], [0.15, 0.12, 0.58]);
       part(body, cylinderGeo(), barrelMat, [0.12, 1, 0.84], [0.04, 0.05, 0.25]).rotation.x = Math.PI / 2;
-      part(body, boxGeo(), standard('engineer-pack', 0x596c56), [0, 1.2, -0.28], [0.52, 0.56, 0.25]);
-      part(body, boxGeo(), roleAccent, [0, 1.26, -0.42], [0.38, 0.18, 0.03]);
+      part(body, boxGeo(), standard('engineer-pack', 0x596c56), [0, 1.7, -0.3], [0.5, 1.3, 0.26]);
+      part(body, boxGeo(), roleAccent, [0, 2.25, -0.4], [0.36, 0.14, 0.03]);
       part(body, cylinderGeo(), plateMat, [-0.41, 1.03, 0.07], [0.055, 0.46, 0.055]).rotation.z = Math.PI / 2;
     }
-    // Rank plates are always visible at field scale; higher ranks add a thin lit shoulder loop.
-    const plateCount = role === 'cadet' ? 1 : 1;
-    for (let i = 0; i < plateCount; i++) part(body, boxGeo(), roleAccent, [0.08, 1.44, 0.31 + i * 0.03], [0.09, 0.08, 0.03]);
+    // Rank plate is always visible at field scale; applyRank adds the ring/chevrons separately.
+    part(body, boxGeo(), roleAccent, [0.08, 1.44, 0.31], [0.09, 0.08, 0.03]);
+    // Stance: a body-level lean and squat gives each role a distinct outline. applyRank's
+    // rank-ring/rank-mark children live on root, not body, so they stay anchored regardless.
+    const stance = STANCE[role];
+    body.rotation.x = stance.lean;
+    body.scale.set(stance.width, stance.height, stance.width);
     body.name = 'soldier-body';
     return root;
   }
@@ -351,13 +403,43 @@ export async function createBattlefield(host: HTMLElement, onDeviceLost: () => v
       part(body, boxGeo(), dark, [0, 1.26, 0.61], [0.24, 0.18, 0.86]);
       part(body, cylinderGeo(), standard('boss-muzzle', 0xf5a04d, { emissive: 0xb35224, emissiveIntensity: 0.8 }), [0, 1.26, 1.02], [0.09, 0.095, 0.2]).rotation.x = Math.PI / 2;
     } else {
-      const stature = kind === 'swarm' ? 0.62 : kind === 'runner' ? 0.78 : 1;
+      // Shape language: scout is the baseline light-infantry read, runner leans into a sprint with
+      // trailing speed fins, and swarm hunches wide with stubby nub-arms — three distinct silhouettes,
+      // not one mesh at three scales.
+      const stature = kind === 'swarm' ? 0.6 : kind === 'runner' ? 0.8 : 1;
       part(body, capsuleGeo(), enemyMat, [0, 0.85 * stature, 0], [1.15 * scl, 1.14 * stature * scl, scl]);
       part(body, sphereGeo(), enemyMat, [0, 1.68 * stature * scl, 0.02], [0.27 * scl, 0.29 * stature * scl, 0.25 * scl]);
       part(body, sphereGeo(), dark, [0, 1.7 * stature * scl, 0.22 * scl], [0.28 * scl, 0.14 * scl, 0.055]);
+      if (kind === 'scout') {
+        // Kit pouch at the hip identifies the baseline light-infantry shape.
+        part(body, boxGeo(), standard('scout-pouch', 0x8a6a4a, { roughness: 0.9 }), [0.24 * scl, 0.6 * scl, -0.14 * scl], [0.22 * scl, 0.22 * scl, 0.16 * scl]);
+      }
+      if (kind === 'runner') {
+        // Forward sprinting lean plus trailing speed fins that extend the outline behind the hips.
+        body.rotation.x = -0.32;
+        for (const side of [-1, 1]) {
+          const fin = part(body, boxGeo(), dark, [side * 0.17 * scl, 0.6 * scl, -0.52 * scl], [0.07 * scl, 0.3 * scl, 0.05 * scl]);
+          fin.rotation.x = 0.5;
+        }
+      }
+      if (kind === 'swarm') {
+        // Hunched, wide crouch with stubby scrabbling nub-arms breaking the sides of the silhouette.
+        body.rotation.x = 0.2;
+        for (const side of [-1, 1]) {
+          const nub = part(body, capsuleGeo(), enemyMat, [side * 0.34 * scl, 0.5 * scl, 0.05 * scl], [0.4 * scl, 0.4 * scl, 0.4 * scl]);
+          nub.rotation.z = side * 0.9;
+        }
+      }
       if (kind === 'armored' || kind === 'elite') {
         part(body, boxGeo(), standard(`enemy-plate-${kind}`, kind === 'elite' ? 0xff9a55 : 0x6b5650, { metalness: 0.48 }), [0, 0.96, 0.19], [0.75 * scl, 0.42 * scl, 0.15]);
         part(body, sphereGeo(), dark, [0, 1.95 * scl, -0.03], [0.36 * scl, 0.22 * scl, 0.32 * scl]);
+        if (kind === 'armored') {
+          // Wide block pauldrons: a heavy, square-shouldered tank read.
+          for (const side of [-1, 1]) part(body, boxGeo(), standard('armored-pauldron', 0x584c46, { metalness: 0.4 }), [side * 0.52 * scl, 1.14 * scl, 0.04 * scl], [0.3 * scl, 0.22 * scl, 0.34 * scl]);
+        } else {
+          // Tall spiked crest: a fast, sharp elite-trooper read that peaks above every other infantry kind.
+          part(body, geometry('elite-crest', () => new ConeGeometry(0.13, 0.46, 6)), standard('elite-crest-mat', 0xffb266, { metalness: 0.42 }), [0, 2.16 * scl, -0.05 * scl], [1, 1, 1]);
+        }
       }
       if (kind === 'medic') {
         part(body, boxGeo(), standard('medic-pack', 0xe7ded0), [0, 0.97, -0.27], [0.43, 0.48, 0.2]);
