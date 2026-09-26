@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { isDeepStrictEqual } from 'node:util';
-import { evaluateGates, HELD_OUT_SEEDS, POLICIES, summarize, TUNING_SEEDS } from './balance';
+import { evaluateGates, HELD_OUT_SEEDS, POLICIES, summarize, TUNING_SEEDS, validateLedger } from './balance';
 import type { makeReport } from './balance';
 
 type PanelReport = Omit<ReturnType<typeof makeReport>, 'summary'> & { summary?: unknown };
@@ -29,6 +29,17 @@ function validate(input: unknown): PanelReport {
     requireValue(!seen.has(key), 'duplicate seed/policy run'); seen.add(key);
     requireValue(run.schemaVersion === 1 && run.strikeMode === report.strikeMode && run.policyHash === report.policyHash
       && run.sourceHash === report.sourceHash && run.contentHash === report.contentHash, 'run provenance differs from panel');
+    validateLedger(run);
+    const last = run.waves.at(-1);
+    requireValue(!!last && last.endTick === run.ticks, 'missing final wave boundary');
+    const final = run.final; const terminal = final.phase === 'victory' || final.phase === 'defeat';
+    requireValue(['victory', 'defeat', 'build', 'combat'].includes(final.phase) && run.timeout === !terminal, 'phase/timeout mismatch');
+    requireValue(final.wave === (last!.startTick === null ? last!.wave - 1 : last!.wave), 'final wave mismatch');
+    requireValue(final.cash === last!.cashAtEnd && final.lives === last!.livesAtEnd, 'final cash/lives mismatch');
+    if (final.phase === 'victory') requireValue(last!.outcome === 'cleared' && final.wave === 30 && final.lives > 0, 'victory outcome mismatch');
+    else if (final.phase === 'defeat') requireValue(last!.outcome === 'defeat' && final.lives === 0, 'defeat outcome mismatch');
+    else requireValue(last!.outcome === 'timeout' && (final.phase === 'build' ? last!.startTick === null : last!.startTick !== null)
+      || final.phase === 'build' && last!.outcome === 'cleared' && last!.startTick !== null, 'partial outcome mismatch');
   }
   for (const seed of report.seeds) for (const policy of POLICIES) requireValue(seen.has(`${seed}:${policy}`), 'missing seed/policy run');
   return report;

@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { compareReports } from '../tools/comparison';
+import { createSession } from '../src/game';
 import { CONTENT_HASH, POLICY_HASH, POLICY_SPEC, POLICIES, runCampaign, SOURCE_FILES, SOURCE_HASH, summarize, TUNING_SEEDS } from '../tools/balance';
 
 const runs = TUNING_SEEDS.flatMap(seed => POLICIES.map(policy => runCampaign({ seed, policy, maxTicks: 1 })));
@@ -44,6 +45,41 @@ describe('paired campaign comparison', () => {
     altered.sourceFiles['src/content.ts'] = altered.contentHash; altered.sourceHash = hash(altered.sourceFiles);
     altered.runs.forEach(run => { run.sourceHash = altered.sourceHash; run.contentHash = altered.contentHash; });
     expect(compareReports(panel, altered).selectedSummary).toEqual(summarize(runs));
+  });
+  it.each([
+    ['spending', (p: typeof panel) => { p.runs[0]!.waves[0]!.spending++; }, 'Wave cash identity'],
+    ['phase', (p: typeof panel) => { p.runs[0]!.final.phase = 'victory'; }, 'phase/timeout mismatch'],
+    ['timeout', (p: typeof panel) => { p.runs[0]!.timeout = false; }, 'phase/timeout mismatch'],
+    ['final wave', (p: typeof panel) => { p.runs[0]!.final.wave++; }, 'final wave mismatch'],
+    ['final cash', (p: typeof panel) => { p.runs[0]!.final.cash++; }, 'final cash/lives mismatch'],
+    ['final lives', (p: typeof panel) => { p.runs[0]!.final.lives--; }, 'final cash/lives mismatch'],
+    ['outcome', (p: typeof panel) => { p.runs[0]!.waves[0]!.outcome = 'cleared'; }, 'partial outcome mismatch'],
+    ['victory outcome', (p: typeof panel) => { p.runs[0]!.final.phase = 'victory'; p.runs[0]!.timeout = false; }, 'victory outcome mismatch'],
+    ['defeat outcome', (p: typeof panel) => {
+      p.runs[0]!.final.phase = 'defeat'; p.runs[0]!.timeout = false;
+      p.runs[0]!.final.lives = 0; p.runs[0]!.waves[0]!.livesAtEnd = 0;
+    }, 'defeat outcome mismatch'],
+  ])('rejects corrupted %s', (_, mutate, reason) => {
+    const altered = structuredClone(panel); mutate(altered);
+    expect(() => compareReports(panel, altered)).toThrow(reason);
+  });
+  it('accepts a valid partial timeout during intermission with an upcoming unstarted wave record', () => {
+    const partial = runCampaign({ seed: 52, policy: 'diverse-greedy', maxTicks: 3000 });
+    const firstClear = partial.waves[0]!.endTick;
+    const intermission = runCampaign({ seed: 52, policy: 'diverse-greedy', maxTicks: firstClear });
+    const session = createSession(52);
+    for (const record of intermission.commands) session.command(record.command);
+    session.advance(firstClear + 1);
+    const frame = session.frame(); const last = intermission.waves[0]!;
+    intermission.ticks++;
+    intermission.waves.push({ ...last, wave: 2, decisionTick: firstClear, startTick: null, endTick: firstClear + 1,
+      outcome: 'timeout', cashBeforePurchases: last.cashAtEnd, cashAtStart: last.cashAtEnd,
+      spending: 0, income: 0, refunds: 0, promotions: 0, startHash: null, endHash: hash(frame) });
+    intermission.finalHash = hash(frame);
+    expect(intermission.final).toMatchObject({ phase: 'build', wave: 1 });
+    expect(intermission.waves.at(-1)).toMatchObject({ wave: 2, startTick: null, outcome: 'timeout' });
+    const altered = structuredClone(panel); altered.runs[0] = intermission;
+    expect(compareReports(panel, altered).selectedSummary[0]!.timeouts).toBe(8);
   });
   it.skipIf(!process.env.SMTD_BALANCE_REVIEW_DIR)('validates actual saved paired panels without rerunning campaigns', () => {
     const load = (file: string) => JSON.parse(readFileSync(join(process.env.SMTD_BALANCE_REVIEW_DIR!, file), 'utf8'));
