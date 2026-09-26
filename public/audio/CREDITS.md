@@ -11,4 +11,6 @@ CC0 deed: https://creativecommons.org/publicdomain/zero/1.0/
 
 Attribution is retained voluntarily. These files may be reused under CC0. Game code and procedural effects have their separate MIT license.
 
+Each of the six soldier roles applies its own pitch, volume and filter (lowpass/highpass/bandpass) to these three recordings so every role has a distinct firing voice, all done in code in `src/audio.ts` with no additional recordings. Enemy death, boss death, the Berserker Rage proc and the boss-arrival cue are likewise original procedural tones and a synthesized noise-burst buffer, not recordings.
+
 The suppressed-shot and casing recordings already hosted for Last Engineer are not part of this source package and are not covered by the CC0 statement above. Production on arcade.shoemoney.com reuses those existing same-origin URLs at the owner's request; forks and local builds use original procedural/treatment fallback. See ASSETS.md in the repository for the complete source and rights distinction.

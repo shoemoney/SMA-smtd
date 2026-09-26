@@ -42,9 +42,9 @@ export function createSession(seed = 7341): Session {
     value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
     return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
   };
-  const event = (kind: CombatEvent['kind'], from: Point, to: Point, role?: Role, amount?: number) => {
+  const event = (kind: CombatEvent['kind'], from: Point, to: Point, role?: Role, amount?: number, boss?: boolean) => {
     events.push({ id: ++eventId, time: time(), kind, from: { x: from.x, z: from.z }, to: { x: to.x, z: to.z },
-      ...(role ? { role } : {}), ...(amount !== undefined ? { amount } : {}) });
+      ...(role ? { role } : {}), ...(amount !== undefined ? { amount } : {}), ...(boss ? { boss } : {}) });
   };
   const earned = (amount: number) => { cash += amount; stats.earned += amount; };
   const refusal = (reason: string): CommandResult => ({ ok: false, reason });
@@ -133,7 +133,7 @@ export function createSession(seed = 7341): Session {
     enemy.hp -= amount; if (tower) tower.damageDealt += amount; stats.damage += amount;
     if (enemy.hp <= 0) {
       enemy.hp = 0; if (tower) tower.kills++; stats.kills++; earned(enemy.bounty); score += enemy.bounty * 10;
-      event('kill', tower ?? { x: 0, z: 0 }, enemy, tower?.role, amount); nextHeal.delete(enemy.id);
+      event('kill', tower ?? { x: 0, z: 0 }, enemy, tower?.role, amount, enemy.boss); nextHeal.delete(enemy.id);
     }
   }
   function attack(tower: Tower, target: Enemy) {

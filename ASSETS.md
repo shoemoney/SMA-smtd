@@ -34,4 +34,19 @@ Last Engineer credits identify the casing clip as an extract from the [owner-sel
 
 The Sniper uses the existing suppressed pistol cue as a suppressed-shot game effect, not a claim that it is a recording of a sniper rifle. Local builds, forks, and failed runtime requests use a quiet, lower-pitched, low-pass treatment of the bundled rifle instead. Casing fallback is an original procedural metallic two-impact cue, not a sampled casing recording. No voice line or Mixkit recording is bundled.
 
+### Per-role shaping and enemy cues, all procedural on top of the same three recordings
+
+All six soldier roles fire out of the same three bundled recordings; no additional binary audio is bundled. Each role applies its own pitch, volume and filter to the shared pistol/rifle buffers so every role is audibly distinct:
+
+| Role | Source clip | Shaping |
+| --- | --- | --- |
+| Cadet | `pistol-shot.wav` | Unfiltered, reference pitch and volume |
+| Combat Engineer | `pistol-shot.wav` | Pitched down, highpass filtered for a thinner, tool-like report |
+| Field Officer | `pistol-shot.wav` | Pitched up, bandpass filtered, layered with a short synthesized comms blip |
+| Machine Gunner | `rifle-shot.wav` (`gunner-burst.wav` while raging) | Reference pitch, louder than Sniper |
+| Sniper | `rifle-shot.wav` (or the Arcade-only suppressed clip) | Slowed and lowpass filtered for a heavier, muffled crack |
+| Grenadier | `rifle-shot.wav` | Slowed far down and heavily lowpass filtered into a launcher thump, layered with a synthesized detonation noise burst |
+
+Enemy death, boss death, the Berserker Rage proc and a boss-arrival sting are all original procedural cues synthesized in `src/audio.ts` (oscillator tones and a noise-burst buffer built the same way as the existing casing fallback) — no additional recordings. Boss arrival is detected by the render loop diffing `Frame.enemies` for a newly seen boss id; it adds no new event type or simulation state.
+
 Audio remains opt-in. Combat, casing and interface voices are capped at 8, 3 and 4 concurrent sources. Shots and casing impacts are throttled, casing is delayed after audible shots, and master gain/compression preserve headroom. Cosmetic variation uses event IDs without consuming combat RNG. Muting cancels active and scheduled sources. Failed recording requests quietly use procedural fallback; runtime cues are requested only on the existing Arcade domain.

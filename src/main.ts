@@ -23,6 +23,7 @@ let reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matche
 let battlefield: Battlefield | null = null;
 let battlefieldReady = false;
 let lastEvent = -1;
+const knownBossIds = new Set<number>();
 let lastInspectorKey = '';
 let ended = false;
 let runToken: string | null = null;
@@ -261,6 +262,7 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) { ses
 function restart() {
   session.command({ kind: 'restart' });
   selectedPad = null; selectedRole = 'cadet'; previewRole = null; lastEvent = -1; ended = false; speed = 1;
+  knownBossIds.clear();
   runGeneration++; runToken = null; tokenPromise = null; scoreSubmission = null;
   get('#speed').textContent = '1× speed';
   get<HTMLButtonElement>('#submit-score').disabled = false;
@@ -353,6 +355,7 @@ function animate(now: number) {
       padButtons[index].style.top = `${position.y + 22}px`;
     });
     for (const event of frame.events) if (event.id > lastEvent) { sound.play(event); lastEvent = event.id; }
+    for (const enemy of frame.enemies) if (enemy.boss && !knownBossIds.has(enemy.id)) { knownBossIds.add(enemy.id); sound.bossArrival(); }
     if (now - lastHud > 150) { renderHud(); lastHud = now; }
   }
   requestAnimationFrame(animate);
