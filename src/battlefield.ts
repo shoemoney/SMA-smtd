@@ -435,10 +435,11 @@ export async function createBattlefield(host: HTMLElement, onDeviceLost: () => v
         part(body, sphereGeo(), dark, [0, 1.95 * scl, -0.03], [0.36 * scl, 0.22 * scl, 0.32 * scl]);
         if (kind === 'armored') {
           // Wide block pauldrons: a heavy, square-shouldered tank read.
-          for (const side of [-1, 1]) part(body, boxGeo(), standard('armored-pauldron', 0x584c46, { metalness: 0.4 }), [side * 0.52 * scl, 1.14 * scl, 0.04 * scl], [0.3 * scl, 0.22 * scl, 0.34 * scl]);
+          for (const side of [-1, 1]) part(body, boxGeo(), standard('armored-pauldron', 0x584c46, { metalness: 0.4 }), [side * 0.31 * scl, 1.18 * scl, -0.02 * scl], [0.24 * scl, 0.3 * scl, 0.46 * scl]);
         } else {
           // Tall spiked crest: a fast, sharp elite-trooper read that peaks above every other infantry kind.
-          part(body, geometry('elite-crest', () => new ConeGeometry(0.13, 0.46, 6)), standard('elite-crest-mat', 0xffb266, { metalness: 0.42 }), [0, 2.16 * scl, -0.05 * scl], [1, 1, 1]);
+          const crest = part(body, geometry('elite-crest', () => new ConeGeometry(0.13, 0.52, 6)), standard('elite-crest-mat', 0xffb266, { metalness: 0.42 }), [0, 1.98 * scl, -0.22 * scl], [1, 1, 1]);
+        crest.rotation.x = 1.95;
         }
       }
       if (kind === 'medic') {
