@@ -122,14 +122,15 @@ export function createSession(seed = 7341): Session {
       const kind = queue[spawnIndex++]!.kind; const spec = ENEMIES[kind];
       const hp = kind === 'boss' ? BOSS_HP[wave] ?? Math.round(spec.hp * definition.hpMultiplier) : Math.round(spec.hp * definition.hpMultiplier);
       const enemy: Enemy = { ...roadPoint(0), id: ++entityId, kind, hp, maxHp: hp, progress: 0,
-        armor: spec.armor, speed: spec.speed, slowUntil: 0, slowFactor: 1,
+        armor: spec.armor, plating: spec.plating, speed: spec.speed, slowUntil: 0, slowFactor: 1,
         bounty: waveBounty(wave, kind === 'boss'), leak: spec.leak, boss: kind === 'boss' };
       enemies.push(enemy); if (kind === 'medic') nextHeal.set(enemy.id, tick + HZ); spawned++;
     }
   }
   function damage(tower: Tower | null, enemy: Enemy, raw: number, instant = false, ignoreArmor = false) {
     if (enemy.hp <= 0) return;
-    const amount = instant ? enemy.hp : Math.min(enemy.hp, Math.max(1, raw * (ignoreArmor ? 1 : 1 - enemy.armor)));
+    const shielded = ignoreArmor ? raw : raw * (1 - enemy.armor) - enemy.plating;
+    const amount = instant ? enemy.hp : Math.min(enemy.hp, Math.max(1, shielded));
     enemy.hp -= amount; if (tower) tower.damageDealt += amount; stats.damage += amount;
     if (enemy.hp <= 0) {
       enemy.hp = 0; if (tower) tower.kills++; stats.kills++; earned(enemy.bounty); score += enemy.bounty * 10;

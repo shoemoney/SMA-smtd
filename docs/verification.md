@@ -140,3 +140,49 @@ sampled, so the curve rewards construction rather than punishing everyone equall
 These are scripted-policy results with fixed purchase order and first-target policy. They
 bound the difficulty; they are not a measurement of human play, and no human playtest of the
 re-tuned campaign has been recorded yet.
+
+### Enemy plating and difficulty reshape, September 27, 2026
+
+The September 26 re-tune made the ending hard and left the opening untouched. Measured over
+40 seeds with the machine-gunner-only policy, first integrity loss was **median wave 29,
+earliest wave 29**: twenty-eight waves at a full 20/20 before anything happened.
+
+Attempts to move that earlier by tuning numbers all failed, and the negative results are the
+useful part. None of the following moved first blood earlier than wave 25: enemy HP at twice
+the shipped ramp, enemy speed +15% and +30%, enemy count +40%, spawn interval cut to 0.6,
+wave rewards halved, kill bounty halved. Each one only made the ending less winnable. The
+cause is structural rather than numeric: the scripted policy holds **4 towers at wave 1, 7 at
+wave 5 and all 16 pads by wave 9**, and complete coverage of a single route cannot leak while
+per-unit HP stays under the threshold that survives the whole gauntlet.
+
+What changed the shape was an **archetype**, not a multiplier. Armored Infantry and Elites now
+carry flat *plating* — 6 and 8 respectively — subtracted from every individual hit after
+percentage armor, with a floor of 1 so nothing is immune. Percentage armor scales with the
+incoming hit and therefore cannot distinguish sixteen cheap shots from four expensive ones;
+a flat subtraction can. Airstrikes ignore it via the existing armor-ignoring path, and Sniper
+headshots still kill non-bosses outright, so both locked behaviours are unchanged.
+
+The wave HP ramp was then reshaped from rising (x1.0 to x2.6) to nearly flat and slightly
+rising (x1.90 to x2.20 on the authored curve), because plating now carries the early load and
+the old curve stacked on top of it produced an 8% win rate.
+
+Machine-gunner-only, 40 seeds, measured on the shipped file:
+
+| | Before Sept 26 | After Sept 26 | Now |
+| --- | --- | --- | --- |
+| Win rate | 100% | 65% | **50%** |
+| Median final lives | 20 | 4 | **2** |
+| First integrity loss | never | wave 29 | **wave 8 (earliest 4)** |
+| Runs that bleed at all | 0/40 | 36/40 | **40/40** |
+
+Lives now read 20 at wave 5, 12 from wave 10 through wave 28, and 10 at wave 30. The midgame
+plateau is real and is not yet addressed: once coverage and ranks catch up, Armored stop
+leaking until the final waves.
+
+Across all five policies on tuning and held-out seeds, three strategies are viable where the
+September 26 build had two. **Sniper-greedy recovered from 0/8 to 5/8 and 6/8**, which is the
+archetype working as intended: flat plating barely touches high damage per shot, so it
+restored a role that percentage armor had made pointless.
+
+These remain scripted-policy measurements with fixed purchase order and first-target policy.
+No human playtest of this build has been recorded.

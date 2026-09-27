@@ -67,6 +67,11 @@ Six soldiers, each with a base rank and **three** promotions. 🎖️
 | 05 | 🔧 **Combat Engineer** | Slow the advance | Slows enemies, extending everyone's time on target |
 | 06 | 📻 **Field Officer** | Damage support | Local damage aura for nearby soldiers |
 
+> ⚔️ **Plating is the anti-spam rule.** Percentage armor scales with the hit, so it cannot tell sixteen cheap shots from
+> four expensive ones. Plating subtracts a flat amount from *every individual hit*, so massed low-rank fire barely
+> scratches Armored and Elites while a Sniper round goes almost straight through. Volume is not the answer; damage per
+> shot is. A floor of 1 means nothing is ever immune.
+
 ⚠️ **Hard rules that never bend:** Rage cannot refresh itself. Bosses resist slowing
 (capped at 15%). Officers cannot buff themselves or other Officers. Only the strongest
 nearby aura applies.
@@ -94,9 +99,9 @@ Seven enemy profiles, each identifiable by **shape alone** — no color required
 | 🥾 **Scout** | Hip kit pouch | Light infantry; the first test of coverage |
 | 🏃 **Runner** | Forward sprint lean, trailing fins | Fast; exposes short coverage |
 | 🐝 **Swarm** | Hunched wide crouch, stubby arms | Dense groups that reward splash |
-| 🛡️ **Armored** | Broad shoulder blocks | 30% damage reduction |
+| 🛡️ **Armored** | Broad shoulder blocks | 30% reduction **+ flat 6 plating per hit** |
 | ➕ **Medic** | Supply pack with red cross | Heals nearby normal enemies |
-| ⚡ **Elite** | Swept crest off the back of the head | Durable *and* fast, 20% reduction |
+| ⚡ **Elite** | Swept crest off the back of the head | Durable *and* fast, 20% reduction **+ flat 8 plating** |
 | 🚜 **Commander** | Tracked hull, turret, cannon | Boss. Authored HP, escorts, 10× bounty |
 
 ---

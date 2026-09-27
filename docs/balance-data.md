@@ -33,17 +33,17 @@ These remain authored values, not validated overall balance. A preregistered pro
 
 ## Enemy profiles
 
-| Enemy | Base HP | Speed | Armor | Initial-wave bounty | Lives lost |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Scout | 38 | 1.6 | 0% | 1 | 1 |
-| Runner | 30 | 2.9 | 0% | 1 | 1 |
-| Swarm | 21 | 1.9 | 0% | 1 | 1 |
-| Armored Infantry | 105 | 1.25 | 30% | 1 | 2 |
-| Medic | 70 | 1.5 | 10% | 1 | 1 |
-| Elite Infantry | 190 | 1.9 | 20% | 1 | 2 |
-| Commander | 748 | 0.85 | 25% | 10 | 5 |
+| Enemy | Base HP | Speed | Armor | Plating | Initial-wave bounty | Lives lost |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Scout | 38 | 1.6 | 0% | 0 | 1 | 1 |
+| Runner | 30 | 2.9 | 0% | 0 | 1 | 1 |
+| Swarm | 21 | 1.9 | 0% | 0 | 1 | 1 |
+| Armored Infantry | 105 | 1.25 | 30% | 6 | 1 | 2 |
+| Medic | 70 | 1.5 | 10% | 0 | 1 | 1 |
+| Elite Infantry | 190 | 1.9 | 20% | 8 | 1 | 2 |
+| Commander | 748 | 0.85 | 25% | 0 | 10 | 5 |
 
-Normal HP is rounded base HP × wave multiplier. Boss HP uses the explicit totals below instead of multiplying the profile HP. Ordinary bounty at spawn is 1 + floor((wave − 1) / 3): 1 for waves 1–3, 2 for 4–6, and so on through 10 for 28–30. Boss bounty is ten times the current ordinary bounty. Wave 1 monsters therefore pay exactly one cash each. Medics heal other normal enemies within 2.2 units once per second by 2% maximum HP; no self or boss healing.
+Damage resolves as percentage armor first, then flat plating subtracted from that single hit, with a floor of 1 so nothing is immune. Percentage armor scales with the hit, so it cannot tell sixteen weak shots from four strong ones; plating can, and it is what makes massed low-rank fire a poor answer to Armored Infantry and Elites. Airstrikes ignore both. Sniper headshots still kill any non-boss outright regardless of either. Normal HP is rounded base HP × wave multiplier. Boss HP uses the explicit totals below instead of multiplying the profile HP. Ordinary bounty at spawn is 1 + floor((wave − 1) / 3): 1 for waves 1–3, 2 for 4–6, and so on through 10 for 28–30. Boss bounty is ten times the current ordinary bounty. Wave 1 monsters therefore pay exactly one cash each. Medics heal other normal enemies within 2.2 units once per second by 2% maximum HP; no self or boss healing.
 
 ## Six commander waves
 
