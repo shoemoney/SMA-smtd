@@ -71,3 +71,36 @@ Retain screenshots, test output, seed and command logs, and browser observations
 Enabling sound on the production game created a running 48 kHz realtime WebAudio context. All three bundled firearm WAVs and both existing arcade suppressed-shot/casing MP3s returned HTTP 200. No console errors were observed. An API-level stress harness also checked role selection, delayed casings, at most 15 simultaneous sources, mute cleanup, time-rewind cleanup, and failed-request fallback. This does not establish subjective loudness quality across physical speakers or headphones.
 
 A clearly named zero-point `QA verification` entry was submitted through the live API. The first request returned 201; the identical retry returned 200 with `replayed: true`, the same score ID, and exactly one matching board row. That verification entry remains because there is no documented cleanup operation. No database was copied, edited or replaced. Leaderboard scores are client-reported.
+
+## Checkpoint: September 26, 2026 — presentation, identity and audio pass
+
+This checkpoint records a later change set. It does not revisit or replace the September 25
+evidence above; the figures recorded there remain the figures that were observed on that day.
+
+**Test suite growth.** The suite is now **48 tests: 46 passing and 2 skipped** (the opt-in
+campaign benchmark and the private saved-panel validation), across four files under `tests/`.
+The earlier "18 tests" figures above are correct as historical records of that release and are
+deliberately left unedited. Note that `npx vitest` run from the repository root will report a
+much larger count, because it also globs stale copies of the suite under the gitignored
+`.local/` directory; scope the run to `tests/` for the real number.
+
+**Battlefield framing (measured, Chrome, WebGPU).** At a 1728 x 1000 CSS viewport the field
+moved from 618 px down the page to 387 px, visible height above the fold from 382 px to
+613 px, and the fraction of canvas width covered by the map from 66% to 89%. The frustum
+carries a 1.5-unit margin, re-measured at aspect ratios 1.40, 1.55, 1.65 and 1.78. Checked at
+390x844, 1280x800, 1440x900, 1728x1000 and 2560x1440. Backend reported WebGPU throughout.
+
+**Unit and enemy identity.** All six soldiers and all seven enemy profiles were rendered and
+inspected at actual field scale, including a frame carrying every enemy kind on the route at
+once. Two enemy cues failed that inspection and were corrected: armored shoulder blocks were
+floating clear of the body, and the elite crest was vertical and therefore invisible under a
+top-down camera. Both were re-checked after the fix. This is a visual inspection of captured
+frames, not a controlled legibility study with human subjects.
+
+**Production artifact.** The built release, served statically from `dist/` at the `/smtd/`
+route, reproduced the same framing measurements and reported WebGPU. This checks the built
+bundle rather than only the development server.
+
+**Not covered by this checkpoint.** Physical devices, screen readers, keyboard-only
+completion, measured busy-wave performance and subjective audio quality remain open exactly
+as recorded above. Arcade preview art still shows the pre-change battlefield framing.
