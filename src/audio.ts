@@ -25,6 +25,7 @@ export class BattlefieldAudio {
   private buffers = new Map<Clip, AudioBuffer>();
   private casing: AudioBuffer | null = null;
   private detonation: AudioBuffer | null = null;
+  private muzzle: AudioBuffer | null = null;
   private voices = new Set<Voice>();
   private lastShot = -Infinity;
   private lastCasing = -Infinity;
@@ -51,6 +52,7 @@ export class BattlefieldAudio {
       this.master.connect(limiter).connect(this.context.destination);
       this.casing = this.createCasing();
       this.detonation = this.createDetonation();
+      this.muzzle = this.createMuzzleBlast();
     }
     await this.context.resume();
     if (this.enabled) this.master!.gain.setTargetAtTime(amplitude(-10), this.context.currentTime, 0.02);
@@ -116,6 +118,15 @@ export class BattlefieldAudio {
         const filter = role === 'sniper' && !suppressed ? SNIPER_FILTER : null;
         played = this.sample(clip, now, volume, rate, pan, filter, role === 'sniper') ||
           this.tone(role === 'sniper' ? 95 : 170, 0.055, 0.055, now, 'combat', true);
+      }
+      // Bang under the shot: pitched per role so the six voices stay distinct, and taking an
+      // ordinary (non-priority) voice so a busy wave drops the layer instead of the shot itself.
+      // The Grenadier already carries its own detonation layer and is excluded.
+      if (played && role !== 'grenadier' && this.muzzle) {
+        const heavy = role === 'gunner' || role === 'sniper';
+        this.buffer(this.muzzle, now, heavy ? -13 : -16,
+          (role === 'sniper' ? 0.82 : heavy ? 0.95 : 1.12) + (event.id % 4) * 0.012,
+          'combat', pan, role === 'sniper' ? SNIPER_FILTER : null, false, 0, 0.2);
       }
       if (played && role !== 'grenadier' && now - this.lastCasing >= 0.2) {
         this.lastCasing = now;
@@ -251,6 +262,30 @@ export class BattlefieldAudio {
 
   /** Procedural explosion burst: broadband noise decay plus a short high crackle overlay. Used for the
    * grenadier's detonation layer and, at a lower rate, the boss-death cue. */
+  /**
+   * A short muzzle blast: near-instant attack, a broadband crack, and a low body thump.
+   * Layered under the CC0 firearm samples so every shot lands with a bang rather than a
+   * click, and synthesized rather than sampled so the licensing statement in ASSETS.md
+   * stays true.
+   */
+  private createMuzzleBlast() {
+    const rate = this.context!.sampleRate;
+    const buffer = this.context!.createBuffer(1, Math.round(rate * 0.24), rate);
+    const data = buffer.getChannelData(0);
+    let state = 8191;
+    for (let index = 0; index < data.length; index++) {
+      const time = index / rate;
+      state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+      const noise = state / 4294967296 * 2 - 1;
+      const attack = Math.min(1, time / 0.0012);
+      const crack = noise * Math.exp(-time * 46) * 0.85;
+      const body = Math.sin(time * 132 * Math.PI * 2) * Math.exp(-time * 26) * 0.5;
+      const snap = Math.sin(time * 1900 * Math.PI * 2) * Math.exp(-time * 150) * 0.18;
+      data[index] = attack * (crack + body + snap);
+    }
+    return buffer;
+  }
+
   private createDetonation() {
     const rate = this.context!.sampleRate;
     const buffer = this.context!.createBuffer(1, Math.round(rate * 0.4), rate);

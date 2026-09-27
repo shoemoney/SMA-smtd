@@ -186,3 +186,33 @@ restored a role that percentage armor had made pointless.
 
 These remain scripted-policy measurements with fixed purchase order and first-target policy.
 No human playtest of this build has been recorded.
+
+### Gunfire presentation, September 27, 2026
+
+Reported: the shots looked like lasers. They were. Every shot built a `CylinderGeometry`
+stretched the full tower-to-target distance, held at constant length for 0.25 s and faded in
+place — a beam by construction, with no muzzle flash and no travel.
+
+Replaced with an actual round. The effect root now sits at the shooter and points down the
+line of fire, so everything is positioned in local +Y along that line: a hot muzzle flash
+cone and white spark at the origin, a short tracer (capped at 0.5 units, or a third of the
+gap) that travels and arrives at 70% of the effect's life, a faint trail behind it, and an
+impact spark at the far end for the remaining 30%. Shot effects run 0.32 s rather than 0.25 s
+so the round is perceptible in flight. Reduced motion places the round at the target
+immediately and suppresses the flash.
+
+The muzzle origin needed correcting after the first capture: shots were leaving from y = 0.28,
+which is pad height, so the flash bloomed around the soldier's boots. The soldier models carry
+their weapons just under y = 1, and the origin now matches at 0.95.
+
+Audio gained a synthesized muzzle blast layered under the existing CC0 samples: near-instant
+attack, broadband crack, low body thump, pitched per role so the six firing voices stay
+distinct, and excluded for the Grenadier which already carries its own detonation. It takes an
+ordinary rather than priority voice, so a busy wave drops the layer instead of the shot. It is
+synthesized rather than sampled, so the licensing statement in ASSETS.md remains true: the
+Last Engineer recordings referenced for sound design were not copied into this repository.
+
+Verified in a real browser during combat rather than from source: muzzle flashes appear at the
+weapons of multiple firing soldiers and a short tracer is visible mid-flight between shooter
+and target. All three CC0 wavs load, sound enables, and no console errors were raised across
+the run.

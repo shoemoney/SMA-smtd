@@ -558,15 +558,29 @@ export async function createBattlefield(host: HTMLElement, onDeviceLost: () => v
       halo = part(root, geometry(`fx-halo-${event.kind}`, () => new TorusGeometry(1, 0.025, 5, 36)), haloMat);
       halo.rotation.x = Math.PI / 2;
     } else {
-      core = part(root, geometry(`fx-beam-${event.kind}`, () => new CylinderGeometry(0.025, 0.055, 1, 7)), coreMat);
-      halo = part(root, geometry(`fx-beam-halo-${event.kind}`, () => new CylinderGeometry(0.07, 0.1, 1, 7)), haloMat);
+      // A bullet, not a beam: a short tracer that travels, a faint trail behind it, and a
+      // muzzle flash pinned at the shooter. The root sits at the muzzle and points down the
+      // line of fire, so everything below is positioned in local +Y along that line.
+      core = part(root, geometry('fx-tracer', () => new CylinderGeometry(0.045, 0.03, 1, 6)), coreMat);
+      halo = part(root, geometry('fx-tracer-trail', () => new CylinderGeometry(0.012, 0.05, 1, 6)), haloMat);
+      const flash = part(root, geometry('fx-muzzle-flash', () => new ConeGeometry(0.24, 0.56, 7)),
+        basic(`effect-flash-${event.kind}`, event.kind === 'headshot' ? 0xcfeaff : 0xffb43c,
+          { transparent: true, opacity: 0, depthWrite: false, toneMapped: false }), [0, 0.2, 0]);
+      flash.name = 'muzzle-flash';
+      const spark = part(root, geometry('fx-muzzle-spark', () => new SphereGeometry(0.16, 8, 6)),
+        basic(`effect-spark-${event.kind}`, 0xfffdf0, { transparent: true, opacity: 0, depthWrite: false, toneMapped: false }));
+      spark.name = 'muzzle-spark';
+      const hit = part(root, geometry('fx-impact', () => new SphereGeometry(0.1, 8, 6)),
+        basic(`effect-impact-${event.kind}`, event.kind === 'headshot' ? 0xbfe9ff : 0xffd9a0,
+          { transparent: true, opacity: 0, depthWrite: false, toneMapped: false }));
+      hit.name = 'impact-spark';
     }
     return { root, core, halo, expires: event.time, eventId: event.id, kind: event.kind };
   }
 
   function presentEffect(event: CombatEvent, reducedMotion: boolean): void {
     if (!['shot', 'headshot', 'rage', 'blast', 'airstrike'].includes(event.kind)) return;
-    const duration = event.kind === 'airstrike' ? 1.4 : event.kind === 'rage' ? 0.62 : event.kind === 'blast' ? 0.66 : 0.25;
+    const duration = event.kind === 'airstrike' ? 1.4 : event.kind === 'rage' ? 0.62 : event.kind === 'blast' ? 0.66 : 0.32;
     if (latestFrameTime >= event.time + duration) return;
     let fx = seenEvents.get(event.id);
     if (!fx) {
@@ -579,7 +593,9 @@ export async function createBattlefield(host: HTMLElement, onDeviceLost: () => v
       scene.add(fx.root);
       seenEvents.set(event.id, fx);
     }
-    const from = new Vector3(event.from.x, 0.28, event.from.z);
+    // Shots leave the weapon, not the pad: the soldier models carry their guns just under
+    // y = 1, so a muzzle flash at the old 0.28 bloomed around the soldier's boots.
+    const from = new Vector3(event.from.x, 0.95, event.from.z);
     const to = new Vector3(event.to.x, event.kind === 'rage' ? 0.055 : 0.72, event.to.z);
     const age = Math.max(0, latestFrameTime - event.time);
     const life = Math.max(0.04, fx.expires - event.time);
@@ -641,12 +657,39 @@ export async function createBattlefield(host: HTMLElement, onDeviceLost: () => v
     } else {
       const delta = to.clone().sub(from);
       const len = Math.max(0.001, delta.length());
-      fx.root.position.copy(from).add(to).multiplyScalar(0.5);
-      fx.root.quaternion.setFromUnitVectors(new Vector3(0, 1, 0), delta.normalize());
-      fx.core.scale.set(1, len, 1);
-      fx.halo.scale.set(1, len, 1);
-      fx.core.material.opacity = (1 - progress) * (event.kind === 'headshot' ? 1 : 0.8);
-      fx.halo.material.opacity = (1 - progress) * 0.28;
+      fx.root.position.copy(from);
+      fx.root.quaternion.setFromUnitVectors(new Vector3(0, 1, 0), delta.clone().normalize());
+      // The round arrives at 70% of the effect's life, leaving the rest for the impact spark.
+      const head = reducedMotion ? 1 : Math.min(1, progress / 0.7);
+      const travel = head * len;
+      const tracer = Math.min(0.5, len * 0.32);
+      fx.core.scale.set(1, tracer, 1);
+      fx.core.position.set(0, Math.max(tracer * 0.5, travel - tracer * 0.5), 0);
+      fx.core.material.opacity = head >= 1 ? 0 : (event.kind === 'headshot' ? 1 : 0.95);
+      const trail = Math.max(0.001, travel - tracer);
+      fx.halo.scale.set(1, trail, 1);
+      fx.halo.position.set(0, trail * 0.5, 0);
+      fx.halo.material.opacity = head >= 1 ? 0 : (1 - progress) * 0.2;
+      // Muzzle flash: brightest on the first frames, gone within a third of the effect.
+      const burn = Math.max(0, 1 - progress / 0.3);
+      const flash = fx.root.getObjectByName('muzzle-flash') as Part | null;
+      if (flash) {
+        flash.material.opacity = reducedMotion ? 0 : burn;
+        flash.scale.set(0.8 + burn * 0.85, 0.75 + burn * 1.05, 0.8 + burn * 0.85);
+      }
+      const spark = fx.root.getObjectByName('muzzle-spark') as Part | null;
+      if (spark) {
+        spark.material.opacity = reducedMotion ? 0 : burn * 0.9;
+        spark.scale.setScalar(0.65 + burn * 1.15);
+      }
+      // Impact spark where the round lands, once it has actually got there.
+      const hit = fx.root.getObjectByName('impact-spark') as Part | null;
+      if (hit) {
+        const land = head >= 1 ? Math.max(0, 1 - (progress - 0.7) / 0.3) : 0;
+        hit.position.set(0, len, 0);
+        hit.material.opacity = land * (event.kind === 'headshot' ? 1 : 0.85);
+        hit.scale.setScalar(0.55 + (1 - land) * 1.1);
+      }
     }
   }
 
