@@ -7,3 +7,5 @@ test-results/
 todo.md
 .local/
 .claude/
+docs/technical-specification.html
+docs/technical-specification.pdf

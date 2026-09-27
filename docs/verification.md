@@ -104,3 +104,39 @@ bundle rather than only the development server.
 **Not covered by this checkpoint.** Physical devices, screen readers, keyboard-only
 completion, measured busy-wave performance and subjective audio quality remain open exactly
 as recorded above. Arcade preview art still shows the pre-change battlefield framing.
+
+### Difficulty re-tune, September 26, 2026
+
+The September 25 record already said "balance remains forgiving: several single-role
+strategies finish with full integrity." Measured against the scripted policies in
+`tools/balance.ts` across all sixteen tuning and held-out seeds, that understated it: **every
+greedy policy won 16 of 16 campaigns with all 20 lives intact and zero leaked integrity**, and
+finished holding more unspent cash (median $5,224) than it had spent (median $5,360).
+
+Literal "3x harder" is not reachable. A flat 3x HP multiplier takes every policy from 8/8 wins
+to 0/8 with zero lives; the entire playable band sits between roughly 1.6x and 2.75x, and any
+count or speed increase stacked on top collapses it. The difficulty response is a cliff, not a
+slope.
+
+What shipped instead is a **ramp**: the authored wave HP multiplier is scaled x1.0 at wave 1
+rising to x2.6 at wave 30, and commander HP is scaled on a gentler x1.0 to x1.5 ramp. Scaling
+bosses at the full trash rate left exactly one viable policy; leaving them unscaled made
+commanders the easy part of a late wave and removed the Sniper's purpose.
+
+Measured on the shipped content, no mutation, eight tuning and eight held-out seeds:
+
+| Policy | Before (both sets) | After, tuning | After, held-out |
+| --- | --- | --- | --- |
+| gunner-greedy | 8/8, 20 lives | 4/8, 4 lives | 6/8, 6 lives |
+| splash-control | 8/8, 20 lives | 4/8, 1 life | 5/8, 4 lives |
+| sniper-greedy | 8/8, 20 lives | 1/8 | 0/8 |
+| diverse-greedy | 8/8, 20 lives | 0/8, ends wave 27 | 0/8, ends wave 27 |
+
+Median leaked integrity moved from 0 to between 7 and 11. The campaign remains provably
+completable: a six-role plan finishes seed 7341 with 12 of 20 lives and is pinned by
+`tests/game.test.ts`. A well-built splash-weighted mixed squad still wins on every seed
+sampled, so the curve rewards construction rather than punishing everyone equally.
+
+These are scripted-policy results with fixed purchase order and first-target policy. They
+bound the difficulty; they are not a measurement of human play, and no human playtest of the
+re-tuned campaign has been recorded yet.

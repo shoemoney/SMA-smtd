@@ -38,7 +38,7 @@ describe('actual campaign content and player command rules', () => {
     for (const role of roles) expect(UNITS[role].ranks).toHaveLength(4);
     expect(WAVES.filter(wave => wave.groups.some(group => group.kind === 'boss')).map(wave => wave.number)).toEqual([5, 10, 15, 20, 25, 30]);
     for (const wave of WAVES.filter(w => w.bossName)) expect(wave.groups.some(group => group.kind !== 'boss')).toBe(true);
-    expect(Object.values(BOSS_HP)).toEqual([700, 2600, 4500, 8640, 13000, 21000]);
+    expect(Object.values(BOSS_HP)).toEqual([748, 3003, 5586, 11470, 18379, 31500]);
     expect(roles.map(role => UNITS[role].ranks[0].cost)).toEqual([10, 25, 40, 55, 70, 85]);
     expect(new Set(WAVES.map(wave => wave.name)).size).toBe(30);
     for (const point of [...PADS, ...actual.ROUTE]) {
@@ -104,9 +104,12 @@ describe('actual campaign content and player command rules', () => {
   });
   it('can complete all thirty authored waves with a reproducible diverse defense', () => {
     const session = createSession(7341);
-    const plan: [number, Role][] = [[0, 'cadet'], [3, 'cadet'], [7, 'cadet'], [9, 'cadet'],
-      [1, 'gunner'], [5, 'grenadier'], [8, 'sniper'], [4, 'engineer'], [2, 'officer'],
-      [11, 'grenadier'], [10, 'gunner'], [6, 'sniper'], [12, 'engineer'], [14, 'gunner'], [15, 'sniper'], [13, 'officer']];
+    // All six roles, ordered by route coverage. The previous four-cadet opening no longer
+    // survives the steeper HP curve; this plan finishes seed 7341 with 12 of 20 lives, so the
+    // campaign stays provably completable without the margin being comfortable.
+    const plan: [number, Role][] = [[0, 'gunner'], [3, 'gunner'], [7, 'gunner'], [9, 'grenadier'],
+      [1, 'gunner'], [5, 'grenadier'], [8, 'sniper'], [4, 'gunner'], [2, 'engineer'],
+      [11, 'gunner'], [10, 'grenadier'], [6, 'officer'], [12, 'gunner'], [14, 'sniper'], [15, 'cadet'], [13, 'engineer']];
     for (let wave = 1; wave <= 30; wave++) {
       for (const [pad, role] of plan) if (!session.frame().towers.some(tower => tower.pad === pad)) {
         session.command({ kind: 'place', role, pad });
@@ -145,7 +148,7 @@ describe('actual campaign content and player command rules', () => {
     expect(session.frame().wave).toBe(4); expect(session.frame().enemies[0]!.bounty).toBe(2);
     session.command({ kind: 'airstrike' }); session.advance(1); session.advance(360);
     expect(session.frame().wave).toBe(5);
-    expect(session.frame().enemies[0]).toMatchObject({ boss: true, maxHp: 700, bounty: 20 });
+    expect(session.frame().enemies[0]).toMatchObject({ boss: true, maxHp: 748, bounty: 20 });
   });
 });
 

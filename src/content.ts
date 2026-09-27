@@ -2,7 +2,7 @@ import type { EnemyKind, EnemySpec, Pad, Point, Role, UnitSpec, WaveSpec, SpawnG
 
 export const STARTING_CASH = 100;
 export const STARTING_LIVES = 20;
-export const BOSS_HP: Record<number, number> = { 5: 700, 10: 2600, 15: 4500, 20: 8640, 25: 13000, 30: 21000 };
+export const BOSS_HP: Record<number, number> = { 5: 748, 10: 3003, 15: 5586, 20: 11470, 25: 18379, 30: 31500 };
 export const waveBounty = (wave: number, boss = false) => (1 + Math.floor((wave - 1) / 3)) * (boss ? 10 : 1);
 export const ROUTE: Point[] = [
   { x: -12, z: -5 }, { x: -8, z: -5 }, { x: -8, z: 3 },
@@ -78,35 +78,35 @@ export const ENEMIES: Record<EnemyKind, EnemySpec> = {
 const group = (kind: EnemyKind, count: number, at = 0, interval = 0.9): SpawnGroup => ({ kind, count, at, interval });
 const authored: [string, string, string, number, SpawnGroup[], string?][] = [
   ['First Contact', 'Scouts approach the supply road.', 'Deploy a Cadet near the first bend.', 1, [group('scout', 8, 0, 1.3)]],
-  ['Running Patrol', 'Runners mix with another scout patrol.', 'Cover more than the entrance.', 1.05, [group('scout', 8), group('runner', 4, 5, 1.3)]],
-  ['Close Formation', 'A dense infantry section is approaching.', 'Explosives punish tightly spaced groups.', 1.1, [group('swarm', 18, 0, 0.4)]],
-  ['Steel Helmets', 'Armored infantry lead a scout formation.', 'Precision damage helps against armor.', 1.15, [group('armored', 4, 0, 2), group('scout', 10, 4)]],
-  ['Lieutenant Flint', 'Medics escort the first commander.', 'Focus a medic before it heals the column.', 1.2, [group('scout', 12, 0, 0.7), group('medic', 3, 2, 3)]],
-  ['Double Time', 'Fast runners arrive in two sections.', 'A slowing engineer gives damage dealers more time.', 1.3, [group('runner', 12, 0, 0.55), group('runner', 8, 10, 0.5)]],
-  ['Packed Road', 'Armored infantry hide among a dense swarm.', 'Combine crowd control and focused damage.', 1.4, [group('swarm', 24, 0, 0.3), group('armored', 6, 3, 1.8)]],
-  ['Veteran Patrol', 'Elites join the road for the first time.', 'Upgrade a primary damage dealer.', 1.5, [group('elite', 5, 0, 2), group('runner', 12, 3, 0.6)]],
-  ['Triage Line', 'Medics sustain a heavy column.', 'Cover the full formation with precision fire and splash damage.', 1.6, [group('armored', 10, 0, 1.2), group('medic', 5, 2, 2), group('swarm', 16, 7, 0.35)]],
-  ['Captain Iron', 'Captain Iron advances behind an escort.', 'A sniper and an engineer can hold a boss in range.', 1.65, [group('boss', 1, 4, 1), group('scout', 18, 0, 0.7), group('medic', 4, 7, 2)], 'Captain Iron'],
-  ['Broken Convoy', 'Scattered sections arrive from a broken convoy.', 'Coverage at several bends reduces leaks.', 1.8, [group('scout', 20, 0, 0.5), group('runner', 14, 8, 0.6)]],
-  ['Armored Screen', 'Armored squads shield elite soldiers.', 'Strongest targeting focuses larger health pools.', 2, [group('armored', 14, 0, 0.8), group('elite', 6, 5, 1.4)]],
-  ['Flood the Road', 'Two packed swarms press the outpost.', 'Splash upgrades expand the damage area.', 2.2, [group('swarm', 32, 0, 0.25), group('swarm', 24, 10, 0.25)]],
-  ['Medical Escort', 'Armored troops escort a medical section.', 'Kill supporting medics and break the formation.', 2.4, [group('armored', 16, 0, 0.8), group('medic', 8, 1, 1.7)]],
-  ['Major Ash', 'The third commander advances with elites and runners.', 'Support fire and slows protect your heavy weapons.', 2.6, [group('runner', 24, 0, 0.4), group('elite', 10, 4, 1)]],
-  ['Siege Infantry', 'A long armored section advances steadily.', 'Officer auras improve nearby damage.', 2.8, [group('armored', 24, 0, 0.6), group('scout', 18, 7, 0.5)]],
-  ['Second Wind', 'Repeated medical teams support elite patrols.', 'Avoid allowing a wounded pack to recover.', 3, [group('elite', 15, 0, 0.9), group('medic', 10, 2, 1.4)]],
-  ['Rush and Crush', 'A swarm rush is followed by heavy armor.', 'Balance burst area damage with armor control.', 3.2, [group('swarm', 42, 0, 0.22), group('armored', 18, 9, 0.7)]],
-  ['Command Guard', 'Elite guards and runners prepare the way.', 'Finish important upgrades before the next commander.', 3.4, [group('elite', 20, 0, 0.65), group('runner', 26, 7, 0.4), group('medic', 6, 5, 2)]],
-  ['Colonel Steel', 'A stronger commander arrives with armored escorts.', 'The commander has 8,640 HP. Keep boss damage in range.', 3.6, [group('boss', 1, 5), group('armored', 22, 0, 0.7), group('elite', 12, 10, 0.9)], 'Colonel Steel'],
-  ['Deep Patrol', 'Veteran sections attack in a long sequence.', 'Keep cash for the final upgrades.', 3.9, [group('elite', 22, 0, 0.7), group('scout', 32, 10, 0.4)]],
-  ['Relentless Rush', 'Two runner sections and elite support test every turn.', 'Slows and broad coverage help against repeated fast arrivals.', 4.2, [group('runner', 24, 0, 0.32), group('runner', 24, 10, 0.32), group('elite', 10, 5, 0.9)]],
-  ['Living Shield', 'Medics hide between armored sections.', 'The strongest target policy may leave a medic alive.', 4.5, [group('armored', 30, 0, 0.5), group('medic', 14, 2, 1), group('swarm', 28, 10, 0.25)]],
-  ['Crowded Front', 'A massive swarm precedes an elite spearhead.', 'Maximize splash coverage along the middle bends.', 4.8, [group('swarm', 64, 0, 0.18), group('elite', 20, 10, 0.6)]],
-  ['Brigadier Storm', 'The fifth commander leads heavy infantry and medics.', 'Top-rank snipers remove ordinary armor instantly on headshots.', 5.1, [group('armored', 34, 0, 0.45), group('elite', 18, 8, 0.6), group('medic', 12, 3, 1.2)]],
-  ['Night March', 'Mixed sections arrive without a long break.', 'Match each role to the coverage it offers.', 5.4, [group('scout', 28, 0, 0.3), group('runner', 30, 4, 0.3), group('elite', 22, 11, 0.5)]],
-  ['Final Reinforcements', 'Medics support a large elite force.', 'The best aura applies once; spreading officers improves coverage.', 5.7, [group('elite', 34, 0, 0.5), group('medic', 18, 2, 0.8)]],
-  ['Overrun Attempt', 'Swarm waves attack between armored sections.', 'Maintain damage across the entire road.', 6, [group('swarm', 72, 0, 0.16), group('armored', 30, 10, 0.4), group('runner', 28, 16, 0.3)]],
-  ['General’s Guard', 'The general’s elite guard attacks first.', 'Prepare fully upgraded boss damage and slowing coverage.', 6.3, [group('elite', 42, 0, 0.4), group('armored', 30, 8, 0.45), group('medic', 16, 4, 0.9)]],
-  ['General Redline', 'The final commander commits the entire reserve.', 'The final commander has 21,000 HP. Use air support wisely.', 6.6, [group('boss', 1, 8), group('elite', 36, 0, 0.5), group('swarm', 64, 8, 0.2), group('medic', 16, 15, 0.8)], 'General Redline'],
+  ['Running Patrol', 'Runners mix with another scout patrol.', 'Cover more than the entrance.', 1.11, [group('scout', 8), group('runner', 4, 5, 1.3)]],
+  ['Close Formation', 'A dense infantry section is approaching.', 'Explosives punish tightly spaced groups.', 1.22, [group('swarm', 18, 0, 0.4)]],
+  ['Steel Helmets', 'Armored infantry lead a scout formation.', 'Precision damage helps against armor.', 1.34, [group('armored', 4, 0, 2), group('scout', 10, 4)]],
+  ['Lieutenant Flint', 'Medics escort the first commander.', 'Focus a medic before it heals the column.', 1.46, [group('scout', 12, 0, 0.7), group('medic', 3, 2, 3)]],
+  ['Double Time', 'Fast runners arrive in two sections.', 'A slowing engineer gives damage dealers more time.', 1.66, [group('runner', 12, 0, 0.55), group('runner', 8, 10, 0.5)]],
+  ['Packed Road', 'Armored infantry hide among a dense swarm.', 'Combine crowd control and focused damage.', 1.86, [group('swarm', 24, 0, 0.3), group('armored', 6, 3, 1.8)]],
+  ['Veteran Patrol', 'Elites join the road for the first time.', 'Upgrade a primary damage dealer.', 2.08, [group('elite', 5, 0, 2), group('runner', 12, 3, 0.6)]],
+  ['Triage Line', 'Medics sustain a heavy column.', 'Cover the full formation with precision fire and splash damage.', 2.31, [group('armored', 10, 0, 1.2), group('medic', 5, 2, 2), group('swarm', 16, 7, 0.35)]],
+  ['Captain Iron', 'Captain Iron advances behind an escort.', 'A sniper and an engineer can hold a boss in range.', 2.47, [group('boss', 1, 4, 1), group('scout', 18, 0, 0.7), group('medic', 4, 7, 2)], 'Captain Iron'],
+  ['Broken Convoy', 'Scattered sections arrive from a broken convoy.', 'Coverage at several bends reduces leaks.', 2.79, [group('scout', 20, 0, 0.5), group('runner', 14, 8, 0.6)]],
+  ['Armored Screen', 'Armored squads shield elite soldiers.', 'Strongest targeting focuses larger health pools.', 3.21, [group('armored', 14, 0, 0.8), group('elite', 6, 5, 1.4)]],
+  ['Flood the Road', 'Two packed swarms press the outpost.', 'Splash upgrades expand the damage area.', 3.66, [group('swarm', 32, 0, 0.25), group('swarm', 24, 10, 0.25)]],
+  ['Medical Escort', 'Armored troops escort a medical section.', 'Kill supporting medics and break the formation.', 4.12, [group('armored', 16, 0, 0.8), group('medic', 8, 1, 1.7)]],
+  ['Major Ash', 'The third commander advances with elites and runners.', 'Support fire and slows protect your heavy weapons.', 4.61, [group('runner', 24, 0, 0.4), group('elite', 10, 4, 1)]],
+  ['Siege Infantry', 'A long armored section advances steadily.', 'Officer auras improve nearby damage.', 5.12, [group('armored', 24, 0, 0.6), group('scout', 18, 7, 0.5)]],
+  ['Second Wind', 'Repeated medical teams support elite patrols.', 'Avoid allowing a wounded pack to recover.', 5.65, [group('elite', 15, 0, 0.9), group('medic', 10, 2, 1.4)]],
+  ['Rush and Crush', 'A swarm rush is followed by heavy armor.', 'Balance burst area damage with armor control.', 6.2, [group('swarm', 42, 0, 0.22), group('armored', 18, 9, 0.7)]],
+  ['Command Guard', 'Elite guards and runners prepare the way.', 'Finish important upgrades before the next commander.', 6.78, [group('elite', 20, 0, 0.65), group('runner', 26, 7, 0.4), group('medic', 6, 5, 2)]],
+  ['Colonel Steel', 'A stronger commander arrives with armored escorts.', 'The commander has 11,470 HP. Keep boss damage in range.', 7.37, [group('boss', 1, 5), group('armored', 22, 0, 0.7), group('elite', 12, 10, 0.9)], 'Colonel Steel'],
+  ['Deep Patrol', 'Veteran sections attack in a long sequence.', 'Keep cash for the final upgrades.', 8.2, [group('elite', 22, 0, 0.7), group('scout', 32, 10, 0.4)]],
+  ['Relentless Rush', 'Two runner sections and elite support test every turn.', 'Slows and broad coverage help against repeated fast arrivals.', 9.07, [group('runner', 24, 0, 0.32), group('runner', 24, 10, 0.32), group('elite', 10, 5, 0.9)]],
+  ['Living Shield', 'Medics hide between armored sections.', 'The strongest target policy may leave a medic alive.', 9.96, [group('armored', 30, 0, 0.5), group('medic', 14, 2, 1), group('swarm', 28, 10, 0.25)]],
+  ['Crowded Front', 'A massive swarm precedes an elite spearhead.', 'Maximize splash coverage along the middle bends.', 10.89, [group('swarm', 64, 0, 0.18), group('elite', 20, 10, 0.6)]],
+  ['Brigadier Storm', 'The fifth commander leads heavy infantry and medics.', 'Top-rank snipers remove ordinary armor instantly on headshots.', 11.85, [group('armored', 34, 0, 0.45), group('elite', 18, 8, 0.6), group('medic', 12, 3, 1.2)]],
+  ['Night March', 'Mixed sections arrive without a long break.', 'Match each role to the coverage it offers.', 12.85, [group('scout', 28, 0, 0.3), group('runner', 30, 4, 0.3), group('elite', 22, 11, 0.5)]],
+  ['Final Reinforcements', 'Medics support a large elite force.', 'The best aura applies once; spreading officers improves coverage.', 13.88, [group('elite', 34, 0, 0.5), group('medic', 18, 2, 0.8)]],
+  ['Overrun Attempt', 'Swarm waves attack between armored sections.', 'Maintain damage across the entire road.', 14.94, [group('swarm', 72, 0, 0.16), group('armored', 30, 10, 0.4), group('runner', 28, 16, 0.3)]],
+  ['General’s Guard', 'The general’s elite guard attacks first.', 'Prepare fully upgraded boss damage and slowing coverage.', 16.03, [group('elite', 42, 0, 0.4), group('armored', 30, 8, 0.45), group('medic', 16, 4, 0.9)]],
+  ['General Redline', 'The final commander commits the entire reserve.', 'The final commander has 31,500 HP. Use air support wisely.', 17.16, [group('boss', 1, 8), group('elite', 36, 0, 0.5), group('swarm', 64, 8, 0.2), group('medic', 16, 15, 0.8)], 'General Redline'],
 ];
 export const WAVES: WaveSpec[] = authored.map(([name, briefing, lesson, hpMultiplier, groups, bossName], index) => {
   const number = index + 1;
