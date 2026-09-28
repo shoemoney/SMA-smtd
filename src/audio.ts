@@ -26,9 +26,11 @@ export class BattlefieldAudio {
   private casing: AudioBuffer | null = null;
   private detonation: AudioBuffer | null = null;
   private muzzle: AudioBuffer | null = null;
+  private impact: AudioBuffer | null = null;
   private voices = new Set<Voice>();
   private lastShot = -Infinity;
   private lastCasing = -Infinity;
+  private lastImpact = -Infinity;
   private lastKill = -Infinity;
   private lastRage = -Infinity;
   private lastBossArrival = -Infinity;
@@ -53,6 +55,7 @@ export class BattlefieldAudio {
       this.casing = this.createCasing();
       this.detonation = this.createDetonation();
       this.muzzle = this.createMuzzleBlast();
+      this.impact = this.createImpact();
     }
     await this.context.resume();
     if (this.enabled) this.master!.gain.setTargetAtTime(amplitude(-10), this.context.currentTime, 0.02);
@@ -76,7 +79,7 @@ export class BattlefieldAudio {
     const context = this.context;
     if (!this.enabled || !context || context.state !== 'running') return;
     if (event.time < this.lastSimulationTime) {
-      this.rageEnds.clear(); this.lastRoleShot.clear(); this.lastShot = -Infinity; this.lastCasing = -Infinity;
+      this.rageEnds.clear(); this.lastRoleShot.clear(); this.lastShot = -Infinity; this.lastCasing = -Infinity; this.lastImpact = -Infinity;
       this.lastKill = -Infinity; this.lastRage = -Infinity;
       for (const voice of [...this.voices]) this.stop(voice);
     }
@@ -127,6 +130,12 @@ export class BattlefieldAudio {
         this.buffer(this.muzzle, now, heavy ? -13 : -16,
           (role === 'sniper' ? 0.82 : heavy ? 0.95 : 1.12) + (event.id % 4) * 0.012,
           'combat', pan, role === 'sniper' ? SNIPER_FILTER : null, false, 0, 0.2);
+      }
+      // Impact, timed to the tracer: battlefield.ts lands the round at 70% of a 0.32 s effect.
+      // Rate-limited separately so sustained fire does not turn into a drum roll.
+      if (played && role !== 'grenadier' && this.impact && now - this.lastImpact >= 0.12) {
+        this.lastImpact = now;
+        this.buffer(this.impact, now + 0.22, -19, 0.94 + (event.id % 5) * 0.03, 'combat', pan, null, false, 0, 0.09);
       }
       if (played && role !== 'grenadier' && now - this.lastCasing >= 0.2) {
         this.lastCasing = now;
@@ -282,6 +291,21 @@ export class BattlefieldAudio {
       const body = Math.sin(time * 132 * Math.PI * 2) * Math.exp(-time * 26) * 0.5;
       const snap = Math.sin(time * 1900 * Math.PI * 2) * Math.exp(-time * 150) * 0.18;
       data[index] = attack * (crack + body + snap);
+    }
+    return buffer;
+  }
+
+  /** A dull, short thud for a round striking a target: low body, almost no top end. */
+  private createImpact() {
+    const rate = this.context!.sampleRate;
+    const buffer = this.context!.createBuffer(1, Math.round(rate * 0.09), rate);
+    const data = buffer.getChannelData(0);
+    let state = 4099;
+    for (let index = 0; index < data.length; index++) {
+      const time = index / rate;
+      state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+      const noise = state / 4294967296 * 2 - 1;
+      data[index] = Math.min(1, time / 0.0008) * (Math.sin(time * 210 * Math.PI * 2) * 0.6 + noise * 0.35) * Math.exp(-time * 60);
     }
     return buffer;
   }

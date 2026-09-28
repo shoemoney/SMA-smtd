@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-f7c36c.svg)](LICENSE)
 [![Renderer](https://img.shields.io/badge/renderer-WebGPU%20%E2%86%92%20WebGL2-3aceff.svg)](#-rendering)
-[![Tests](https://img.shields.io/badge/tests-46%20passing-59b99a.svg)](#-verify)
+[![Tests](https://img.shields.io/badge/tests-50%20passing-59b99a.svg)](#-verify)
 [![Three.js](https://img.shields.io/badge/three.js-0.186-8cbde9.svg)](https://threejs.org/)
 [![Play](https://img.shields.io/badge/play-arcade.shoemoney.com-e7b657.svg)](https://arcade.shoemoney.com/smtd/)
 
@@ -219,7 +219,9 @@ Open the address Vite prints. 🌐
 ## ✅ Verify
 
 ```sh
-npm test        # 46 passing, 2 skipped (opt-in benchmark + saved-panel validation)
+npm test        # 50 passing, 2 skipped (opt-in benchmark + saved-panel validation)
+npm run difficulty                       # when a policy starts bleeding, and which waves do it
+npm run difficulty -- splash-control 24  # any policy, any seed count
 npm run build   # tsc --noEmit && vite build
 npm run preview
 ```

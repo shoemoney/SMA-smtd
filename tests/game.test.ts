@@ -204,6 +204,21 @@ describe('combat contract with isolated content fixtures', () => {
     expect(lethalBoss.frame().stats).toMatchObject({ headshots: 1, headshotKills: 1, kills: 1 });
     lethalBoss.advance(600); expect(lethalBoss.frame().stats.headshotKills).toBe(1);
   });
+  it('plating subtracts a flat amount from every hit after armor, never below one', () => {
+    // Percentage armor scales with the hit; plating does not. A 9-damage Cadet round against
+    // plating 6 lands 3, while the same plating barely dents a heavy round.
+    fixture('scout'); ENEMIES.scout.plating = 6;
+    const light = deployed('cadet'); light.advance(1);
+    expect(light.frame().stats.damage).toBe(9 - 6);
+    fixture('scout'); ENEMIES.scout.plating = 6; ENEMIES.scout.armor = 0.3;
+    const armored = deployed('cadet'); armored.advance(1);
+    expect(armored.frame().stats.damage).toBe(1);      // 9 × 0.7 − 6 = 0.3, floored to 1
+    fixture('scout'); ENEMIES.scout.plating = 500;
+    const immune = deployed('cadet'); immune.advance(1);
+    expect(immune.frame().stats.damage).toBe(1);        // the floor: nothing is ever immune
+    expect(actual.ENEMIES.armored.plating).toBe(6);
+    expect(actual.ENEMIES.elite.plating).toBe(8);
+  });
   it('does not bank idle fire, applies strongest aura once, and excludes officers', () => {
     fixture(); WAVES[0]!.groups[0]!.at = 10;
     const idle = deployed('cadet'); idle.advance(601);

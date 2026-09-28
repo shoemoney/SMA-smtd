@@ -216,3 +216,33 @@ Verified in a real browser during combat rather than from source: muzzle flashes
 weapons of multiple firing soldiers and a short tracer is visible mid-flight between shooter
 and target. All three CC0 wavs load, sound enables, and no console errors were raised across
 the run.
+
+### Midgame plateau investigation and new guards, September 28, 2026
+
+**The plateau is kept, deliberately.** `npm run difficulty` shows all gunner-only integrity loss
+comes from exactly two waves — wave 8 (the first Elites, reached while the squad is still rank 0)
+and wave 29 (42 Elites) — with zero loss on every wave between. Four levers were measured against
+all policies over sixteen seeds, not just gunner-only: plating that grows with the wave, Elite
+counts scaled 1.5–2.5× across waves 11–27, and authored HP spikes of 1.5–2.4× on sets of mid
+waves. Plating growth only moved the plateau's height; +1 plating at wave 10 alone dropped lives
+from 12 to 2. Elite count changed nothing. Every HP spike that eroded the midgame killed
+splash-control (for example 15/16 wins to 0/16), because splash does modest per-hit damage and
+plating absorbs it. An earlier gunner-only search had recommended a ×2.4 spike that, measured
+across policies, stopped splash and diverse builds dead at wave 12. The shipped build is the
+only measured shape with three viable strategies, so the plateau stays as a known trade-off.
+
+**New tests.** `tests/game.test.ts` pins plating arithmetic (9 − 6 = 3, the floor of 1, and the
+shipped values 6 and 8). `tests/difficulty.test.ts` pins the curve's shape on the tuning seeds:
+gunner-only must lose integrity by wave 12, never finish at 20 lives, and still win at least
+once. Both were mutation-checked: removing the plating subtraction fails with `expected 9 to be
+3`, and zeroing Armored and Elite plating fails the shape test with `expected undefined to be
+defined` — that seed never loses integrity at all.
+
+**Tooling.** The difficulty probe moved from gitignored scratch space to `tools/difficulty.ts`
+(`npm run difficulty`), so the measurements behind these decisions survive the checkout.
+
+**Audio.** A synthesized impact thud now plays 0.22 s after each shot, matching the moment the
+tracer lands, with its own rate limit so sustained fire does not become a drum roll.
+
+Browser verification was not possible for this batch: the Playwright MCP server failed to
+connect. The impact sound is verified by tests and build only.

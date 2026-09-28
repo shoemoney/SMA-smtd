@@ -9,7 +9,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 127.0.0.1",
     "test": "vitest run",
-    "test:balance": "vitest run tests/balance.benchmark.test.ts"
+    "test:balance": "vitest run tests/balance.benchmark.test.ts",
+    "difficulty": "tsx tools/difficulty.ts"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.0.1",
@@ -19,6 +20,7 @@
   },
   "devDependencies": {
     "@types/three": "^0.183.1",
+    "tsx": "^4.23.15",
     "typescript": "^5.9.3",
     "vite": "8.3.1",
     "vitest": "^4.0.0"
